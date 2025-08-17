@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+usage() {
+  echo "Usage: smc <profile-number>" >&2
+  exit 1
+}
+
+# Validate arg
+[[ $# -ge 1 ]] || usage
+[[ $1 =~ ^[0-9]+$ ]] || usage
+profile="$1"
+
+# Find first ratbag device
+device="$(ratbagctl | awk -F: 'NR==1{print $1}')"
+
+if [[ -z ${device:-} ]]; then
+  echo "smc: Could not detect a ratbag device" >&2
+  exit 1
+fi
+
+exec ratbagctl "$device" profile active set "$profile"
